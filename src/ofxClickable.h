@@ -23,6 +23,7 @@ public:
     virtual void setBackgroundColor(ofColor cbg) {cBackground=cbg;}
     virtual void setStringColor(ofColor cstr) {cString=cstr;}
 
+    bool getActive() {return isActive;}
     ofColor getActiveColor() {return cActive;}
     ofColor getHoverColor() {return cHover;}
     ofColor getPressedColor() {return cPressed;}
