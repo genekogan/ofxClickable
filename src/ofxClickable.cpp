@@ -8,7 +8,7 @@ ofxClickable::ofxClickable() {
     isPressed = false;
     isActive = false;
     font = NULL;
-    drawStr = "";
+    name = "";
     cHover = ofColor::orange;
     cPressed = ofColor::red;
     cActive = ofColor::green;
@@ -17,43 +17,51 @@ ofxClickable::ofxClickable() {
 }
 
 //--------------------------------------------------------------
-void ofxClickable::setup(string msg, float x, float y, float w, float h) {
-    setString(msg);
+void ofxClickable::setup(string name, float x, float y, float w, float h) {
+    setName(name);
     setPosition(x, y);
     resize(w, h);
 }
 
 //--------------------------------------------------------------
-void ofxClickable::setString(string msg) {
-    drawStr = msg;
+void ofxClickable::setName(string name) {
+    this->name = name;
 }
 
 //--------------------------------------------------------------
-void ofxClickable::load(string path) {
-    thumb.load(path);
+void ofxClickable::loadIcon(string path) {
+    this->iconPath = path;
+    icon.load(iconPath);
+    if (icon.isAllocated()) {
+        icon.resize(rect.getWidth(), rect.getHeight());
+    }
 }
 
 //--------------------------------------------------------------
-void ofxClickable::save(string path) {
-    thumb.save(path);
+void ofxClickable::saveIcon(string path) {
+    this->iconPath = path;
+    icon.save(iconPath);
 }
 
 //--------------------------------------------------------------
 void ofxClickable::resize(int w, int h) {
     rect.setWidth(w);
     rect.setHeight(h);
-    thumb.resize(rect.getWidth(), rect.getHeight());
+    if (icon.isAllocated()) {
+        icon.resize(rect.getWidth(), rect.getHeight());
+    }
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setFromTexture(ofTexture * texture) {
-    texture->readToPixels(thumb);
+    texture->readToPixels(icon);
 }
 
 //--------------------------------------------------------------
 void ofxClickable::draw() {
     ofPushStyle();
     
+    ofFill();
     if (isActive) {
         ofSetColor(cActive);
         ofDrawRectangle(rect.getX()-4, rect.getY()-4, rect.getWidth()+8, rect.getHeight()+8);
@@ -68,18 +76,18 @@ void ofxClickable::draw() {
     }
     
     ofSetColor(cBackground);
-    ofDrawRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-    if (thumb.isAllocated()) {
+    ofDrawRectangle(rect);
+    if (icon.isAllocated()) {
         ofSetColor(ofColor::white);
-        thumb.draw(rect.getX(), rect.getY());
+        icon.draw(rect.getX(), rect.getY());
     }
-    if (drawStr != "" && font != NULL) {
+    if (name != "" && font != NULL) {
         ofSetColor(cString);
-        int fw = font->getStringBoundingBox(drawStr, 0, 0).getWidth();
-        int fh = font->getStringBoundingBox(drawStr, 0, 0).getHeight();
+        int fw = font->getStringBoundingBox(name, 0, 0).getWidth();
+        int fh = font->getStringBoundingBox(name, 0, 0).getHeight();
         int x = rect.getX() + 0.5 * (rect.getWidth() - fw);
         int y = rect.getY() + rect.getHeight() - 0.5 * (rect.getHeight() - fh);
-        font->drawString(drawStr, x, y);
+        font->drawString(name, x, y);
     }
     
     ofPopStyle();
@@ -118,5 +126,5 @@ void ofxClickable::mouseReleased(int x, int y){
 
 //--------------------------------------------------------------
 void ofxClickable::buttonClicked() {
-    ofLog() << "Click!";
+    ofNotifyEvent(clickEvent, this);
 }

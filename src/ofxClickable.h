@@ -7,12 +7,11 @@ class ofxClickable {
 public:
     ofxClickable();
     
-    virtual void load(string path);
-    virtual void save(string path);
-    
     virtual void setup(string msg, float x, float y, float w, float h);
-    virtual void setString(string msg);
+    virtual void setName(string name);
     virtual void setFont(ofTrueTypeFont *font_) {this->font = font_;}
+    virtual void loadIcon(string path);
+    virtual void saveIcon(string path);
     virtual void resize(int w, int h);
     virtual void setFromTexture(ofTexture * texture);
     
@@ -22,7 +21,8 @@ public:
     virtual void setPressedColor(ofColor pressed) {cPressed=pressed;}
     virtual void setBackgroundColor(ofColor cbg) {cBackground=cbg;}
     virtual void setStringColor(ofColor cstr) {cString=cstr;}
-
+    
+    string getName() {return name;}
     bool getActive() {return isActive;}
     ofColor getActiveColor() {return cActive;}
     ofColor getHoverColor() {return cHover;}
@@ -41,13 +41,16 @@ public:
     virtual void mousePressed(int x, int y);
     virtual void mouseReleased(int x, int y);
     
+    ofEvent<void> clickEvent;
+    
 protected:
     
     bool isHover, isPressed, isActive;
     ofColor cHover, cPressed, cActive, cString, cBackground;
-    ofImage thumb;
+    ofImage icon;
     ofRectangle rect;
-    string drawStr;
+    string name;
+    string iconPath;
     ofTrueTypeFont *font;
 };
 
