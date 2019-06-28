@@ -9,6 +9,7 @@ public:
     
     virtual void setup(string msg, float x, float y, float w, float h);
     virtual void setName(string name);
+
     virtual void setFont(ofTrueTypeFont *font_);
     virtual void loadIcon(string path);
     virtual void saveIcon(string path);
@@ -17,7 +18,11 @@ public:
     virtual void setFromTexture(ofTexture * texture);
     virtual void setFromPixels(ofPixels * pixels);
     
+    virtual void enable();
+    virtual void disable();
+    virtual void setEnabled(bool toEnable);
     virtual void setActive(bool active);
+
     virtual void setActiveColor(ofColor active);
     virtual void setHoverColor(ofColor hover);
     virtual void setPressedColor(ofColor pressed);
@@ -28,8 +33,9 @@ public:
     virtual void setBackgroundGradient(int bGradientAmt);
     virtual void setCornerRounded(int roundCorners);
 
-    virtual string getName() {return name;}
     virtual bool getActive() {return isActive;}
+    virtual bool getEnabled() {return isEnabled;}
+    virtual string getName() {return name;}
     virtual ofColor getActiveColor() {return cActive;}
     virtual ofColor getHoverColor() {return cHover;}
     virtual ofColor getPressedColor() {return cPressed;}
@@ -58,19 +64,29 @@ protected:
     
     virtual void updateFbo();
     
-    bool isHover, isPressed, isActive;
-    ofColor cHover, cPressed, cActive, cString, cBackground, cActiveBackground;
+    bool isHover;
+    bool isPressed;
+    bool isActive;
+    bool isEnabled;
+
+    ofColor cHover;
+    ofColor cPressed;
+    ofColor cActive;
+    ofColor cString;
+    ofColor cBackground;
+    ofColor cActiveBackground;
+    
     ofImage icon;
     ofRectangle rect;
     ofFbo fboBg;
     ofFbo fboMask;
+    ofTrueTypeFont *font;
+
     string name;
     string iconPath;
-    ofTrueTypeFont *font;
     int margin;
     int roundCorners;
     int bGradientAmt;
-
 };
 
 

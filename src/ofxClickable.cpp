@@ -7,6 +7,7 @@ ofxClickable::ofxClickable() {
     margin = 3;
     bGradientAmt = 0;
     roundCorners = 0;
+    isEnabled = false;
     isHover = false;
     isPressed = false;
     isActive = false;
@@ -25,11 +26,31 @@ void ofxClickable::setup(string name, float x, float y, float w, float h) {
     setName(name);
     setPosition(x, y);
     resize(w, h);
+    isEnabled = true;
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setName(string name) {
     this->name = name;
+}
+
+//--------------------------------------------------------------
+void ofxClickable::enable() {
+    this->isEnabled = true;
+}
+
+//--------------------------------------------------------------
+void ofxClickable::disable() {
+    this->isEnabled = false;
+}
+
+//--------------------------------------------------------------
+void ofxClickable::setEnabled(bool toEnable) {
+    if (toEnable) {
+        enable();
+    } else {
+        disable();
+    }
 }
 
 //--------------------------------------------------------------
@@ -106,6 +127,11 @@ void ofxClickable::updateFbo() {
         float x = 0.5 * (rect.getWidth() - icon.getWidth());
         float y = 0.5 * (rect.getHeight() - icon.getHeight());
         icon.draw(x, y);
+    }
+
+    if (!isEnabled) {
+        ofSetColor(ofColor::white, 100);
+        ofDrawRectRounded(0, 0, rect.getWidth(), rect.getHeight(), roundCorners);
     }
     
     fboBg.end();
