@@ -7,7 +7,7 @@ ofxClickable::ofxClickable() {
     margin = 3;
     bGradientAmt = 0;
     roundCorners = 0;
-    isEnabled = false;
+    isEnabled = true;
     isHover = false;
     isPressed = false;
     isActive = false;
@@ -19,6 +19,7 @@ ofxClickable::ofxClickable() {
     cString = ofColor::black;
     cBackground = ofColor::white;
     cActiveBackground = ofColor(220, 245, 220);
+    fboMask.allocate(rect.getWidth(), rect.getHeight());
 }
 
 //--------------------------------------------------------------
@@ -36,12 +37,16 @@ void ofxClickable::setName(string name) {
 
 //--------------------------------------------------------------
 void ofxClickable::enable() {
-    this->isEnabled = true;
+    isEnabled = true;
+    updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::disable() {
-    this->isEnabled = false;
+    isEnabled = false;
+    isHover = false;
+    isActive = false;
+    updateFbo();
 }
 
 //--------------------------------------------------------------
@@ -87,14 +92,15 @@ void ofxClickable::resize(int w, int h) {
     rect.setWidth(w);
     rect.setHeight(h);
     if (icon.isAllocated()) {
-        icon.resize(rect.getWidth(), rect.getHeight());
+        loadIcon(iconPath);
     }
+    fboMask.allocate(rect.getWidth(), rect.getHeight());
     updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::updateFbo() {
-    fboMask.allocate(rect.getWidth(), rect.getHeight());
+    ofPushStyle();
     
     // draw the rounded mask
     fboMask.begin();
@@ -130,11 +136,13 @@ void ofxClickable::updateFbo() {
     }
 
     if (!isEnabled) {
-        ofSetColor(ofColor::white, 100);
+        ofSetColor(ofColor::white, 200);
         ofDrawRectRounded(0, 0, rect.getWidth(), rect.getHeight(), roundCorners);
     }
-    
+
     fboBg.end();
+    
+    ofPopStyle();
 }
 
 //--------------------------------------------------------------
@@ -211,6 +219,7 @@ void ofxClickable::draw() {
 
 //--------------------------------------------------------------
 void ofxClickable::buttonClicked() {
+    if (!isEnabled) return;
     ofNotifyEvent(clickEvent, this);
 }
 
@@ -240,36 +249,36 @@ void ofxClickable::setActiveColor(ofColor active) {
 
 //--------------------------------------------------------------
 void ofxClickable::setHoverColor(ofColor hover) {
-    cHover=hover;
+    cHover = hover;
     updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setPressedColor(ofColor pressed) {
-    cPressed=pressed;
+    cPressed = pressed;
     updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setBackgroundColor(ofColor cbg) {
-    cBackground=cbg;
+    cBackground = cbg;
     updateFbo();
 }
 //--------------------------------------------------------------
 void ofxClickable::setActiveBackgroundColor(ofColor cbg) {
-    cActiveBackground=cbg;
+    cActiveBackground = cbg;
     updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setStringColor(ofColor cstr) {
-    cString=cstr;
+    cString = cstr;
     updateFbo();
 }
 
 //--------------------------------------------------------------
 void ofxClickable::setMargin(int mgn) {
-    margin=mgn;
+    margin = mgn;
     updateFbo();
 }
 
@@ -281,16 +290,18 @@ void ofxClickable::setFont(ofTrueTypeFont *font_) {
 
 //--------------------------------------------------------------
 void ofxClickable::mouseMoved(int x, int y){
+    if (!isEnabled) return;
     isHover = rect.inside(x, y);
 }
 
 //--------------------------------------------------------------
 void ofxClickable::mouseDragged(int x, int y){
-    
+    if (!isEnabled) return;
 }
 
 //--------------------------------------------------------------
 void ofxClickable::mousePressed(int x, int y){
+    if (!isEnabled) return;
     if (isHover) {
         isPressed = true;
     }
@@ -298,6 +309,7 @@ void ofxClickable::mousePressed(int x, int y){
 
 //--------------------------------------------------------------
 void ofxClickable::mouseReleased(int x, int y){
+    if (!isEnabled) return;
     if (isPressed) {
         isPressed = false;
         buttonClicked();
