@@ -44,6 +44,7 @@ public:
     virtual ofColor getStringColor() {return cString;}
     virtual ofRectangle getRectangle() {return rect;}
     virtual ofImage & getIcon() {return icon;}
+    virtual string & getIconPath() {return iconPath;}
     virtual int getMargin() {return margin;}
     virtual int getBackgroundGradient() {return bGradientAmt;}
     virtual int getCornerRounded() {return roundCorners;}
