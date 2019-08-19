@@ -51,6 +51,7 @@ public:
 
     virtual void setPosition(int x, int y);
     virtual void draw();
+    virtual void draw(ofEventArgs& e);
     
     virtual void buttonClicked();
 
@@ -59,6 +60,14 @@ public:
     virtual void mousePressed(int x, int y);
     virtual void mouseReleased(int x, int y);
     
+    virtual void mouseMoved(ofMouseEventArgs &e);
+    virtual void mousePressed(ofMouseEventArgs &e);
+    virtual void mouseDragged(ofMouseEventArgs &e);
+    virtual void mouseReleased(ofMouseEventArgs &e);
+    
+    virtual void setAutoMouse(bool autoMouse);
+    virtual void setAutoDraw(bool autoDraw);
+
     ofEvent<void> clickEvent;
 
 protected:
@@ -88,6 +97,9 @@ protected:
     int margin;
     int roundCorners;
     int bGradientAmt;
+
+    bool autoMouse;
+    bool autoDraw;
 };
 
 

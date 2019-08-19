@@ -20,6 +20,8 @@ ofxClickable::ofxClickable() {
     cBackground = ofColor::white;
     cActiveBackground = ofColor(220, 245, 220);
     fboMask.allocate(rect.getWidth(), rect.getHeight());
+    autoMouse = false;
+    autoDraw = false;
 }
 
 //--------------------------------------------------------------
@@ -47,6 +49,34 @@ void ofxClickable::disable() {
     isHover = false;
     isActive = false;
     updateFbo();
+}
+
+//--------------------------------------------------------------
+void ofxClickable::setAutoMouse(bool autoMouse) {
+    this->autoMouse = autoMouse;
+    if (autoMouse) {
+        ofAddListener(ofEvents().mouseMoved, this, &ofxClickable::mouseMoved);
+        ofAddListener(ofEvents().mousePressed, this, &ofxClickable::mousePressed);
+        ofAddListener(ofEvents().mouseDragged, this, &ofxClickable::mouseDragged);
+        ofAddListener(ofEvents().mouseReleased, this, &ofxClickable::mouseReleased);
+    }
+    else {
+        ofRemoveListener(ofEvents().mouseMoved, this, &ofxClickable::mouseMoved);
+        ofRemoveListener(ofEvents().mousePressed, this, &ofxClickable::mousePressed);
+        ofRemoveListener(ofEvents().mouseDragged, this, &ofxClickable::mouseDragged);
+        ofRemoveListener(ofEvents().mouseReleased, this, &ofxClickable::mouseReleased);
+    }
+}
+
+//--------------------------------------------------------------
+void ofxClickable::setAutoDraw(bool autoDraw) {
+    this->autoDraw = autoDraw;
+    if (autoDraw) {
+        ofAddListener(ofEvents().draw, this, &ofxClickable::draw);
+    }
+    else {
+        ofRemoveListener(ofEvents().draw, this, &ofxClickable::draw);
+    }
 }
 
 //--------------------------------------------------------------
@@ -218,6 +248,11 @@ void ofxClickable::draw() {
 }
 
 //--------------------------------------------------------------
+void ofxClickable::draw(ofEventArgs& e) {
+    draw();
+}
+
+//--------------------------------------------------------------
 void ofxClickable::buttonClicked() {
     if (!isEnabled) return;
     ofNotifyEvent(clickEvent, this);
@@ -315,3 +350,24 @@ void ofxClickable::mouseReleased(int x, int y){
         buttonClicked();
     }
 }
+
+//--------------------------------------------------------------
+void ofxClickable::mouseMoved(ofMouseEventArgs &e) {
+    mouseMoved(e.x, e.y);
+}
+
+//--------------------------------------------------------------
+void ofxClickable::mousePressed(ofMouseEventArgs &e) {
+    mousePressed(e.x, e.y);
+}
+
+//--------------------------------------------------------------
+void ofxClickable::mouseDragged(ofMouseEventArgs &e) {
+    mouseDragged(e.x, e.y);
+}
+
+//--------------------------------------------------------------
+void ofxClickable::mouseReleased(ofMouseEventArgs &e) {
+    mouseReleased(e.x, e.y);
+}
+
