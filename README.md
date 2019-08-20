@@ -1,3 +1,3 @@
-# ofxCanvas
+# ofxClickable
 
-ofxCanvas is a simple drawing canvas with buttons.
+for a gooey GUI
