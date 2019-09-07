@@ -7,6 +7,8 @@ ofxClickable::ofxClickable() {
     margin = 3;
     bGradientAmt = 0;
     roundCorners = 0;
+    iconIsVideo = false;
+    videoInit = false;
     isEnabled = true;
     isHover = false;
     isPressed = false;
@@ -18,6 +20,7 @@ ofxClickable::ofxClickable() {
     cActive = ofColor::lightGreen;
     cString = ofColor::black;
     cBackground = ofColor::white;
+    transparentBg = false;
     cActiveBackground = ofColor(220, 245, 220);
     fboMask.allocate(rect.getWidth(), rect.getHeight());
     autoMouse = false;
@@ -97,15 +100,30 @@ void ofxClickable::setActive(bool active) {
 //--------------------------------------------------------------
 void ofxClickable::loadIcon(string path) {
     this->iconPath = path;
-    icon.load(iconPath);
-    if (icon.isAllocated()) {
-        int iw = icon.getWidth();
-        int ih = icon.getHeight();
-        float aspect = float(iw) / ih;
-        if (aspect > rect.getWidth() / rect.getHeight()) {
-            icon.resize(rect.getWidth(), rect.getWidth()/aspect);
-        } else {
-            icon.resize(aspect * rect.getHeight(), rect.getHeight());
+    string ext = ofFilePath::getFileExt(iconPath);
+    iconIsVideo = (ofToLower(ext) == "mp4" || ofToLower(ext) == "mov");
+    if (iconIsVideo) {
+        iconV.load(iconPath);
+        iconW = iconV.getWidth();
+        iconH = iconV.getHeight();
+        iconAspect = float(iconW) / iconH;
+        iconV.setLoopState(OF_LOOP_NORMAL);
+        iconV.play();
+        iconV.setPaused(false);
+        iconV.firstFrame();
+        ofAddListener(ofEvents().update, this, &ofxClickable::update);
+    }
+    else {
+        icon.load(iconPath);
+        if (icon.isAllocated()) {
+            iconW = icon.getWidth();
+            iconH = icon.getHeight();
+            iconAspect = float(iconW) / iconH;
+            if (iconAspect > rect.getWidth() / rect.getHeight()) {
+                icon.resize(rect.getWidth(), rect.getWidth()/iconAspect);
+            } else {
+                icon.resize(iconAspect * rect.getHeight(), rect.getHeight());
+            }
         }
     }
     updateFbo();
@@ -129,6 +147,22 @@ void ofxClickable::resize(int w, int h) {
 }
 
 //--------------------------------------------------------------
+void ofxClickable::update(ofEventArgs & evt) {
+    if (!iconV.isInitialized() || !iconV.isLoaded()) {
+        return;
+    }
+    
+    if (!iconV.isPaused() || !videoInit) {
+        iconV.update();
+        if (iconV.isFrameNew()) {
+            updateFbo();
+            iconV.setPaused(!isHover);
+            videoInit = true;
+        }
+    }
+}
+
+//--------------------------------------------------------------
 void ofxClickable::updateFbo() {
     ofPushStyle();
     
@@ -145,20 +179,34 @@ void ofxClickable::updateFbo() {
     ofClear(0, 0);
 
     // draw background or gradient
-    if (bGradientAmt > 0) {
-        ofColor color = isActive ? cActiveBackground : cBackground;
-        ofColor color2 = ofColor(ofClamp(color.r-bGradientAmt, 0, 255),
-                                 ofClamp(color.g-bGradientAmt, 0, 255),
-                                 ofClamp(color.b-bGradientAmt, 0, 255));
-        ofBackgroundGradient(color, color2, OF_GRADIENT_LINEAR);
-    }
-    else {
-        ofColor color = isActive ? cActiveBackground : cBackground;
-        ofBackground(color);
+    if (!transparentBg) {
+        if (bGradientAmt > 0) {
+            ofColor color = isActive ? cActiveBackground : cBackground;
+            ofColor color2 = ofColor(ofClamp(color.r-bGradientAmt, 0, 255),
+                                     ofClamp(color.g-bGradientAmt, 0, 255),
+                                     ofClamp(color.b-bGradientAmt, 0, 255));
+            ofBackgroundGradient(color, color2, OF_GRADIENT_LINEAR);
+        }
+        else {
+            ofColor color = isActive ? cActiveBackground : cBackground;
+            ofBackground(color);
+        }
     }
 
     // draw the icon
-    if (icon.isAllocated()) {
+    if (iconIsVideo) {
+        ofSetColor(ofColor::white);
+        if (iconAspect > rect.getWidth() / rect.getHeight()) {
+            float x = 0;
+            float y = 0.5 * (rect.getHeight() - rect.getWidth() / iconAspect);
+            iconV.draw(x, y, rect.getWidth(), rect.getWidth() / iconAspect);
+        } else {
+            float x = 0.5 * (rect.getWidth() - iconAspect * rect.getHeight());
+            float y = 0;
+            iconV.draw(x, y, iconAspect * rect.getHeight(), rect.getHeight());
+        }
+    }
+    else if (icon.isAllocated()) {
         ofSetColor(ofColor::white);
         float x = 0.5 * (rect.getWidth() - icon.getWidth());
         float y = 0.5 * (rect.getHeight() - icon.getHeight());
@@ -196,6 +244,14 @@ void ofxClickable::setFromTexture(ofTexture * texture) {
 void ofxClickable::setFromPixels(ofPixels * pixels) {
     icon.setFromPixels(*pixels);
     updateFbo();
+}
+
+//--------------------------------------------------------------
+void ofxClickable::setIconPlayOnOver(bool videoPlayOnOver) {
+    this->videoPlayOnOver = videoPlayOnOver;
+    if (!iconIsVideo) {
+        return;
+    }
 }
 
 //--------------------------------------------------------------
@@ -299,6 +355,13 @@ void ofxClickable::setBackgroundColor(ofColor cbg) {
     cBackground = cbg;
     updateFbo();
 }
+
+//--------------------------------------------------------------
+void ofxClickable::setBackgroundTransparent(bool transparentBg) {
+    this->transparentBg = transparentBg;
+    updateFbo();
+}
+
 //--------------------------------------------------------------
 void ofxClickable::setActiveBackgroundColor(ofColor cbg) {
     cActiveBackground = cbg;
@@ -327,6 +390,9 @@ void ofxClickable::setFont(ofTrueTypeFont *font_) {
 void ofxClickable::mouseMoved(int x, int y){
     if (!isEnabled) return;
     isHover = rect.inside(x, y);
+    if (iconIsVideo && videoPlayOnOver && iconV.isLoaded() && iconV.isInitialized()) {
+        iconV.setPaused(!isHover);
+    }
 }
 
 //--------------------------------------------------------------

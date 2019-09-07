@@ -17,7 +17,8 @@ public:
     virtual void resize(int w, int h);
     virtual void setFromTexture(ofTexture * texture);
     virtual void setFromPixels(ofPixels * pixels);
-    
+    virtual void setIconPlayOnOver(bool videoPlayOnOver);
+
     virtual void enable();
     virtual void disable();
     virtual void setEnabled(bool toEnable);
@@ -27,6 +28,7 @@ public:
     virtual void setHoverColor(ofColor hover);
     virtual void setPressedColor(ofColor pressed);
     virtual void setBackgroundColor(ofColor cbg);
+    virtual void setBackgroundTransparent(bool transparentBg);
     virtual void setActiveBackgroundColor(ofColor cbg);
     virtual void setStringColor(ofColor cstr);
     virtual void setMargin(int mgn);
@@ -72,6 +74,7 @@ public:
 
 protected:
     
+    virtual void update(ofEventArgs & evt);
     virtual void updateFbo();
     
     bool isHover;
@@ -85,8 +88,15 @@ protected:
     ofColor cString;
     ofColor cBackground;
     ofColor cActiveBackground;
+    bool transparentBg;
     
     ofImage icon;
+    ofVideoPlayer iconV;
+    bool iconIsVideo;
+    bool videoInit;
+    bool videoPlayOnOver;
+    float iconW, iconH;
+    float iconAspect;
     ofRectangle rect;
     ofFbo fboBg;
     ofFbo fboMask;
